@@ -19,13 +19,14 @@ class Tree:
         self.root = None
 
     def _insert(self,v,root):
-        root.size += 1
-        if v<root.v:
-            if root.left: return self._insert(v,root.left)
-            else : root.left = Node(v,'r',root);return root.left
-        else:
-            if root.right : return self._insert(v,root.right)
-            else :root.right = Node(v,'r',root);return root.right
+        while True:
+            root.size += 1
+            if v<root.v:
+                if root.left: root = root.left
+                else : root.left = Node(v,'r',root);return root.left
+            else:
+                if root.right : root = root.right
+                else :root.right = Node(v,'r',root);return root.right
 
     def _rotate_left(self,X):
         right = X.right
@@ -91,8 +92,7 @@ class Tree:
             N = self.root
         else:
             N = self._insert(v,self.root)
-
-        self._repair(N)
+            self._repair(N)
 
     def _bound(self,v,root,func):
         if root==None: return None
@@ -107,7 +107,14 @@ class Tree:
     def lower_bound(self,v):
         return self._bound(v,self.root,lambda v,nv:v<=nv)
 
-    
+    def bigger(self,v,root): #No of elements bigger than v in tree
+        ans = 0
+        while root:
+            if v<root.v:
+                ans += getattr(root.right,'size',0)+1
+                root = root.left
+            else: root = root.right
+        return ans    
 
 
 #--------Test & Benchmark----------------------------------------
@@ -167,7 +174,7 @@ def build(N,R):
     return t,li
 
 s = clock()
-t,li = build(10**3,10**3)
+t,li = build(10**5,10**8)
 w = clock()
 print(w-s)
 bound_test(t)
@@ -176,12 +183,4 @@ sorting_test(t)
 size_test(t.root)
 depth = postorder(t.root)
 print("Depth:",depth)
-
-
-
-
-
-
-
-
 
