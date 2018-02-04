@@ -1,4 +1,5 @@
 class Node:
+    __slots__ = ['col','v','left','right','par','size']
     def __init__(self,v,col,par):
         self.col = col 
         self.v = v
@@ -86,13 +87,9 @@ class Tree:
         G.col = 'r'  
 
     def insert(self,v):
-        #print("ins:",v)
         if self.root==None:
             self.root = Node(v,'b',None)
-            N = self.root
-        else:
-            N = self._insert(v,self.root)
-            self._repair(N)
+        self.insert = lambda v:self._repair(self._insert(v,self.root))
 
     def _bound(self,v,root,func):
         if root==None: return None
