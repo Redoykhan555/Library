@@ -1,5 +1,3 @@
-import random
-
 class Node:
     def __init__(self,v,col,par):
         self.col = col 
@@ -7,16 +5,21 @@ class Node:
         self.left = None 
         self.right = None
         self.par = par
+        self.size = 1
+
+    def update_size(s):
+        s.size = getattr(s.left,'size',0)+getattr(s.right,'size',0)+1
 
     def __repr__(self):
         x = "root" if self.par==None else str(self.par.v)
-        return str(self.v)+" "+self.col+" "+x
+        return str(self.v)+" "+self.col+" "+x+" "+str(self.size)
 
 class Tree:
     def __init__(self):
         self.root = None
 
     def _insert(self,v,root):
+        root.size += 1
         if v<root.v:
             if root.left: return self._insert(v,root.left)
             else : root.left = Node(v,'r',root);return root.left
@@ -31,9 +34,11 @@ class Tree:
         right.left = X
         right.par = X.par
         X.par = right
+
+        X.update_size();right.update_size()
         if right.par==None: return
         if right.par.right==X: right.par.right = right
-        else: right.par.left = right
+        else: right.par.left = right    
 
     def _rotate_right(self,X):
         left = X.left
@@ -42,6 +47,8 @@ class Tree:
         left.right = X
         left.par = X.par
         X.par = left
+
+        X.update_size();left.update_size()
         if left.par==None: return
         if left.par.left==X: left.par.left = left
         else: left.par.right = left
@@ -85,11 +92,28 @@ class Tree:
         else:
             N = self._insert(v,self.root)
 
-
         self._repair(N)
 
+    def _bound(self,v,root,func):
+        if root==None: return None
+        if func(v,root.v):
+            return self._bound(v,root.left,func) or root
+        else:
+            return self._bound(v,root.right,func)
 
-#--------Test-----------------------------------------
+    def upper_bound(self,v):
+        return self._bound(v,self.root,lambda v,nv:v<nv)
+
+    def lower_bound(self,v):
+        return self._bound(v,self.root,lambda v,nv:v<=nv)
+
+    
+
+
+#--------Test & Benchmark----------------------------------------
+from random import choices
+from time import clock
+
 
 def traverse(root,li):
     if root==None: return
@@ -104,29 +128,54 @@ def inorder(root):
     print(root)
     inorder(root.right)
 
-def preorder(root):
-    if root==None: return
-    print(root)
-    preorder(root.left)
-    preorder(root.right)
+def postorder(root):
+    if root==None: return 0
+    a = postorder(root.left)
+    b = postorder(root.right)
+    return max(a,b)+1
 
-def test(n):
-    li = [random.randint(1,100) for i in range(n)]
-    t = Tree()
-    for k in li:
-        t.insert(k)
+def pprint(root,sp=""):
+    if not root: print(sp,"-"*6);return
+    print(sp,root)
+    pprint(root.left,sp+" "*6)
+    pprint(root.right,sp+" "*6)
+
+def sorting_test(t):
     x = traverse(t.root,[])
     assert x==sorted(li)
 
-"""N=20
-li = [random.randint(1,100) for i in range(N)]
-li=[96, 95, 69, 35, 84, 83, 73, 4, 55, 25, 77, 51, 94, 41, 54, 69, 72, 5, 7, 78]
-t = Tree()
-for k in li:
-    t.insert(k)
-    print("\n\n")
-"""
-test(80000)
+def size_test(root):
+    if root==None: return 0
+    a = size_test(root.left)
+    b = size_test(root.right)
+    assert root.size==a+b+1
+    return a+b+1
+
+def bound_test(t,R=10**3+100):
+    v = choices(range(R),k=1)[0]
+    n = t.upper_bound(v)
+    if not n:
+        print("None:",v,max(traverse(t.root,[])));return
+    print(v,n.v)
+    assert n.v == min(filter(lambda x:x>v,traverse(t.root,[])))
+
+def build(N,R):
+    li = choices(range(R),k=N)
+    t = Tree()
+    for k in li:
+        t.insert(k)
+    return t,li
+
+s = clock()
+t,li = build(10**3,10**3)
+w = clock()
+print(w-s)
+bound_test(t)
+
+sorting_test(t)
+size_test(t.root)
+depth = postorder(t.root)
+print("Depth:",depth)
 
 
 
@@ -134,6 +183,5 @@ test(80000)
 
 
 
-        
 
-    
+
