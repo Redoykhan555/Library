@@ -7,7 +7,7 @@ template <typename T>
 T* lower(T* start,T* end,T v){
 	while(true){
 		T* m = start + (end-start)/2;
-		if(m==start) return end;
+		if(m==start) return end; //cause 'end' can be eq to v, 'start' will always be lower..so same for upper_bound too
 		if(*m<v) start = m;
 		else end = m;
 	}

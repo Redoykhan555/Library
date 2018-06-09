@@ -42,3 +42,22 @@ int main(){
 	for (int i = 0; i < N; ++i){if(arr[i]!=temp[i]) cout<<"HELL "<<endl;} 
 	return 0;
 }
+
+/*
+void msort(int* start,int* last){
+	if(last-start<=1) return;
+	int* mid = start+(last-start)/2;
+	msort(start,mid);
+	msort(mid,last);
+
+	int *left = start,*right = mid,*put=buffer,*boo=buffer;
+	while(left<mid && right<last){
+		if(*left<*right) *put++ = *left++;
+		else *put++ = *right++;
+	}
+	while(left<mid) *put++ = *left++;
+	while(right<last) *put++ = *right++;
+	while(start<last) *start++ = *boo++;
+
+}
+*/
